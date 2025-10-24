@@ -1,0 +1,41 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# --------------------------
+# Load CSV dataset
+# --------------------------
+csv_file = r"C:\Users\rupam\.cache\kagglehub\datasets\shantanudhakadd\bank-customer-churn-prediction\versions\1\Churn_Modelling.csv"
+df = pd.read_csv(csv_file)
+print("Columns:", df.columns)
+
+# --------------------------
+# Preprocess data
+# --------------------------
+# Drop irrelevant columns
+X = df.drop(['RowNumber', 'CustomerId', 'Surname', 'Exited'], axis=1)
+y = df['Exited']
+
+# Convert categorical columns using one-hot encoding
+X = pd.get_dummies(X, columns=['Geography', 'Gender'], drop_first=True)
+
+# --------------------------
+# Split dataset
+# --------------------------
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# --------------------------
+# Train models
+# --------------------------
+lr_model = LogisticRegression(max_iter=1000)
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+gb_model = GradientBoostingClassifier(n_estimators=100, random_state=42)
+
+for model, name in zip([lr_model, rf_model, gb_model], ["Logistic Regression", "Random Forest", "Gradient Boosting"]):
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    print(f"\n{name}:")
+    print(classification_report(y_test, y_pred))
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
